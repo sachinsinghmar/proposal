@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>I Love You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e, #0d0630, #3a1a5c);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            touch-action: manipulation;
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        #title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff6b6b, 0 0 40px #ff2a2a;
+            animation: pulse 2s infinite;
+            width: 100%;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        #subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            background: linear-gradient(to right, #ffffff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        #message {
+            font-size: 1.1rem;
+            max-width: 90%;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #ffffff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            pointer-events: auto;
+        }
+
+        .proposal-button {
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #yes-button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ff2a2a);
+            box-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff2a2a;
+        }
+
+        #yes-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        #yes-button:hover::before {
+            left: 100%;
+        }
+
+        #yes-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ff6b6b, 0 0 40px #ff2a2a;
+        }
+
+        #yes-button:active {
+            transform: scale(0.95);
+        }
+
+        #no-button {
+            background: linear-gradient(45deg, #6b6b6b, #8e8e8e, #2a2a2a);
+            box-shadow: 0 0 20px #6b6b6b, 0 0 30px #2a2a2a;
+        }
+
+        #no-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #6b6b6b, 0 0 40px #2a2a2a;
+        }
+
+        #no-button:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #response {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 2rem;
+            opacity: 0;
+            transition: opacity 1s ease;
+            width: 100%;
+            text-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff2a2a;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+
+        #app {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Desktop styles */
+        @media (min-width: 768px) {
+            #title {
+                font-size: 4rem;
+            }
+
+            #subtitle {
+                font-size: 2rem;
+            }
+
+            #message {
+                font-size: 1.5rem;
+                max-width: 80%;
+            }
+
+            .proposal-button {
+                padding: 15px 40px;
+                font-size: 1.5rem;
+                width: 150px;
+            }
+
+            #response {
+                font-size: 3rem;
+            }
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 5;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+
+        /* Floating hearts decoration */
+        .floating-heart {
+            position: absolute;
+            font-size: 2rem;
+            color: #ff6b6b;
+            opacity: 0.7;
+            text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff2a2a;
+            animation: float 8s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Tear drop styling */
+        .tear {
+            position: absolute;
+            width: 4px;
+            height: 10px;
+            background: linear-gradient(to bottom, #64b5f6, #1976d2);
+            border-radius: 0 0 50% 50%;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        /* Special effects container */
+        .effects-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Confetti effect */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+
+        /* Star effect */
+        .star {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">Loading 3D Experience...</div>
+    <div id="overlay">
+        <h1 id="title">I Love You</h1>
+        <div id="subtitle">Will you be mine forever?</div>
+        <p id="message">Every moment with you has been magical. You are the light of my life, and I can't imagine my future without you by my side.</p>
+        <div class="buttons-container">
+            <button id="yes-button" class="proposal-button">Yes</button>
+            <button id="no-button" class="proposal-button">No</button>
+        </div>
+        <div id="response"></div>
+    </div>
+    <div id="app"></div>
+    <div class="effects-container" id="effects-container"></div>
+
+    <!-- Include Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Create floating hearts decoration
+        function createFloatingHearts() {
+            const heartSymbols = ['❤️', '💖', '💘', '💗', '💓', '💞', '💕', '💟'];
+            
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                heart.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                document.body.appendChild(heart);
+            }
+        }
+
+        // Create tear drops for crying effect
+        function createTearDrops() {
+            for (let i = 0; i < 20; i++) {
+                const tear = document.createElement('div');
+                tear.className = 'tear';
+                tear.style.left = Math.random() * 100 + 'vw';
+                tear.style.top = '-20px';
+                tear.style.opacity = '0';
+                document.body.appendChild(tear);
+                
+                // Animate tear drops
+                setTimeout(() => {
+                    tear.style.opacity = '0.8';
+                    tear.style.transition = 'top 3s linear, opacity 1s';
+                    tear.style.top = '100vh';
+                    
+                    // Remove tear after animation
+                    setTimeout(() => {
+                        tear.remove();
+                    }, 3000);
+                }, i * 300);
+            }
+        }
+
+        // Create confetti effect for celebration
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#6b6bff', '#6bff6b', '#ffff6b', '#ff6bff'];
+            const container = document.getElementById('effects-container');
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.opacity = '0';
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                container.appendChild(confetti);
+                
+                // Animate confetti
+                setTimeout(() => {
+                    confetti.style.opacity = '1';
+                    confetti.style.transition = 'top 3s ease-out, opacity 1s, transform 3s';
+                    confetti.style.top = '100vh';
+                    confetti.style.transform += ' rotate(' + (Math.random() * 720 - 360) + 'deg)';
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 20);
+            }
+        }
+
+        // Create star burst effect
+        function createStarBurst() {
+            const container = document.getElementById('effects-container');
+            
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = '50%';
+                star.style.top = '50%';
+                star.style.opacity = '0';
+                container.appendChild(star);
+                
+                // Animate stars
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 200;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                setTimeout(() => {
+                    star.style.opacity = '1';
+                    star.style.transition = 'all 1s ease-out';
+                    star.style.transform = `translate(${x}px, ${y}px)`;
+                    
+                    // Remove star after animation
+                    setTimeout(() => {
+                        star.remove();
+                    }, 1000);
+                }, i * 30);
+            }
+        }
+
+        // Wait for Three.js to load
+        function init() {
+            // Create floating hearts
+            createFloatingHearts();
+            
+            // Remove loading message
+            document.querySelector('.loading').style.display = 'none';
+            
+            // Create scene
+            const scene = new THREE.Scene();
+            scene.background = null; // Transparent background to show CSS gradient
+
+            // Create camera
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Create renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.querySelector('#app').appendChild(renderer.domElement);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xff6b6b, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xff6b6b, 1.5, 100);
+            pointLight.position.set(0, 0, 5);
+            scene.add(pointLight);
+
+            // Create enhanced heart shape
+            function createHeart() {
+                const heartShape = new THREE.Shape();
+                
+                // Classic heart shape
+                heartShape.moveTo(0, 0);
+                heartShape.bezierCurveTo(0, -0.5, -0.5, -1, 0, -1.5);
+                heartShape.bezierCurveTo(0.5, -1, 1, -0.5, 0, 0);
+                heartShape.bezierCurveTo(-1, 0.5, -0.5, 1, 0, 1.5);
+                heartShape.bezierCurveTo(0.5, 1, 1, 0.5, 0, 0);
+                
+                return heartShape;
+            }
+
+            // Create tear drop shape for emotional effect
+            function createTearDrop() {
+                const tearShape = new THREE.Shape();
+                
+                // Tear drop shape
+                tearShape.moveTo(0, 0);
+                tearShape.bezierCurveTo(-0.3, -0.5, -0.5, -1, 0, -1.5);
+                tearShape.bezierCurveTo(0.5, -1, 0.3, -0.5, 0, 0);
+                
+                return tearShape;
+            }
+
+            // Create ring shape for special effect
+            function createRing() {
+                const ringShape = new THREE.RingGeometry(0.8, 1, 32);
+                return ringShape;
+            }
+
+            // Create multiple hearts
+            const hearts = [];
+            const heartCount = window.innerWidth < 768 ? 15 : 25;
+            
+            // Create heart geometry
+            const heartGeometry = new THREE.ExtrudeGeometry(createHeart(), {
+                depth: 0.3,
+                bevelEnabled: true,
+                bevelSegments: 3,
+                steps: 2,
+                bevelSize: 0.1,
+                bevelThickness: 0.1
+            });
+
+            // Create enhanced heart material with glowing effect
+            const heartMaterial = new THREE.MeshPhongMaterial({
+                color: 0xff6b6b,
+                emissive: 0xff2a2a,
+                emissiveIntensity: 0.8,
+                specular: 0xff9e9e,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.95
+            });
+
+            // Create multiple hearts at different positions
+            for (let i = 0; i < heartCount; i++) {
+                const heart = new THREE.Mesh(heartGeometry, heartMaterial);
+                
+                // Random positions in a sphere
+                const radius = 5 + Math.random() * 10;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                heart.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                heart.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                heart.position.z = radius * Math.cos(phi);
+                
+                // Random rotations
+                heart.rotation.x = Math.random() * Math.PI;
+                heart.rotation.y = Math.random() * Math.PI;
+                
+                // Random scales with more variation
+                const scale = 0.3 + Math.random() * 1.2;
+                heart.scale.set(scale, scale, scale);
+                
+                // Store animation properties
+                heart.userData = {
+                    speed: 0.3 + Math.random() * 1.2,
+                    rotationSpeed: 0.005 + Math.random() * 0.015,
+                    radius: radius,
+                    theta: theta,
+                    phi: phi
+                };
+                
+                scene.add(heart);
+                hearts.push(heart);
+            }
+
+            // Handle window resize
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            window.addEventListener('resize', onWindowResize);
+
+            // Handle touch events for mobile
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            renderer.domElement.addEventListener('touchstart', (event) => {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            }, { passive: true });
+
+            renderer.domElement.addEventListener('touchmove', (event) => {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchX = event.touches[0].clientX;
+                const touchY = event.touches[0].clientY;
+                
+                const deltaX = touchX - touchStartX;
+                const deltaY = touchY - touchStartY;
+                
+                // Rotate scene based on touch movement
+                scene.rotation.y += deltaX * 0.01;
+                scene.rotation.x += deltaY * 0.01;
+                
+                touchStartX = touchX;
+                touchStartY = touchY;
+            }, { passive: true });
+
+            renderer.domElement.addEventListener('touchend', () => {
+                touchStartX = 0;
+                touchStartY = 0;
+            }, { passive: true });
+
+            // Mouse controls for desktop
+            let mouseDown = false;
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+
+            renderer.domElement.addEventListener('mousedown', (event) => {
+                mouseDown = true;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            });
+
+            renderer.domElement.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+
+            renderer.domElement.addEventListener('mousemove', (event) => {
+                if (!mouseDown) return;
+                
+                const deltaX = event.clientX - lastMouseX;
+                const deltaY = event.clientY - lastMouseY;
+                
+                scene.rotation.y += deltaX * 0.01;
+                scene.rotation.x += deltaY * 0.01;
+                
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+            });
+
+            // Handle proposal button clicks
+            document.getElementById('yes-button').addEventListener('click', () => {
+                document.querySelector('.buttons-container').style.display = 'none';
+                document.getElementById('response').textContent = 'I KNEW YOU WOULD! I LOVE YOU TOO!';
+                document.getElementById('response').style.opacity = '1';
+                
+                // Create celebration effects
+                createConfetti();
+                createStarBurst();
+                
+                // Make all hearts pulse bigger and change color
+                hearts.forEach(heart => {
+                    heart.userData.pulse = true;
+                    heart.userData.pulseStartTime = Date.now();
+                });
+            });
+
+            // Handle "No" button with emotional effect
+            document.getElementById('no-button').addEventListener('click', () => {
+                // Hide buttons
+                document.querySelector('.buttons-container').style.display = 'none';
+                
+                // Change title and subtitle to emotional content
+                document.getElementById('title').textContent = "I'm Heartbroken";
+                document.getElementById('subtitle').textContent = "Tears in My Eyes...";
+                document.getElementById('message').textContent = "I never imagined this pain. My heart is breaking into pieces. Please reconsider?";
+                
+                // Create tear drops
+                createTearDrops();
+                
+                // Create tear drop 3D objects
+                const tearGeometry = new THREE.ExtrudeGeometry(createTearDrop(), {
+                    depth: 0.1,
+                    bevelEnabled: true,
+                    bevelSegments: 2,
+                    steps: 1,
+                    bevelSize: 0.05,
+                    bevelThickness: 0.05
+                });
+                
+                const tearMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x64b5f6,
+                    emissive: 0x1976d2,
+                    emissiveIntensity: 0.5,
+                    specular: 0xbbdefb,
+                    shininess: 100,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                // Add crying tear drop objects
+                for (let i = 0; i < 10; i++) {
+                    const tear = new THREE.Mesh(tearGeometry, tearMaterial);
+                    tear.position.set(
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10
+                    );
+                    tear.scale.set(0.5, 0.8, 0.5);
+                    tear.userData = {
+                        speed: 0.02 + Math.random() * 0.03,
+                        rotationSpeed: 0.01 + Math.random() * 0.02
+                    };
+                    scene.add(tear);
+                    hearts.push(tear); // Add to hearts array for animation
+                }
+                
+                // Add broken heart objects
+                const brokenHeartGeometry = new THREE.ExtrudeGeometry(createHeart(), {
+                    depth: 0.2,
+                    bevelEnabled: true,
+                    bevelSegments: 2,
+                    steps: 1,
+                    bevelSize: 0.05,
+                    bevelThickness: 0.05
+                });
+                
+                const brokenHeartMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x78909c,
+                    emissive: 0x546e7a,
+                    emissiveIntensity: 0.3,
+                    specular: 0xb0bec5,
+                    shininess: 50,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                
+                // Add broken hearts
+                for (let i = 0; i < 8; i++) {
+                    const brokenHeart = new THREE.Mesh(brokenHeartGeometry, brokenHeartMaterial);
+                    brokenHeart.position.set(
+                        (Math.random() - 0.5) * 15,
+                        (Math.random() - 0.5) * 15,
+                        (Math.random() - 0.5) * 15
+                    );
+                    brokenHeart.scale.set(0.6, 0.6, 0.6);
+                    brokenHeart.userData = {
+                        speed: 0.01 + Math.random() * 0.02,
+                        rotationSpeed: 0.005 + Math.random() * 0.01
+                    };
+                    scene.add(brokenHeart);
+                    hearts.push(brokenHeart); // Add to hearts array for animation
+                }
+                
+                // Show response with encouragement to choose yes
+                document.getElementById('response').textContent = "Please Say Yes... I'm Begging You";
+                document.getElementById('response').style.opacity = '1';
+                
+                // Show the yes button again but larger
+                const yesButton = document.getElementById('yes-button');
+                yesButton.textContent = "Yes, Please!";
+                yesButton.style.display = 'block';
+                yesButton.style.width = '200px';
+                yesButton.style.margin = '20px auto';
+                yesButton.style.position = 'relative';
+                yesButton.style.left = '0';
+                yesButton.style.top = '0';
+                document.querySelector('.buttons-container').style.display = 'block';
+                
+                // Add event listener to the new yes button
+                yesButton.onclick = function() {
+                    document.querySelector('.buttons-container').style.display = 'none';
+                    document.getElementById('title').textContent = "I Love You";
+                    document.getElementById('subtitle').textContent = "You Made Me So Happy!";
+                    document.getElementById('message').textContent = "Thank you for saying yes! You've made me the happiest person alive!";
+                    document.getElementById('response').textContent = "I LOVE YOU FOREVER!";
+                    document.getElementById('response').style.opacity = '1';
+                    
+                    // Create celebration effects
+                    createConfetti();
+                    createStarBurst();
+                    
+                    // Make all hearts pulse bigger and change to happy colors
+                    hearts.forEach(heart => {
+                        heart.userData.pulse = true;
+                        heart.userData.pulseStartTime = Date.now();
+                        // Change to happy heart color
+                        if (heart.material.color.r > 0.5) { // If it's not a tear or broken heart
+                            heart.material.color.set(0xff6b6b);
+                            heart.material.emissive.set(0xff2a2a);
+                        }
+                    });
+                };
+            });
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Animate hearts and other objects
+                hearts.forEach(heart => {
+                    // Orbital motion
+                    heart.userData.theta += heart.userData.speed * 0.01;
+                    heart.userData.phi += heart.userData.speed * 0.005;
+                    
+                    heart.position.x = heart.userData.radius * Math.sin(heart.userData.phi) * Math.cos(heart.userData.theta);
+                    heart.position.y = heart.userData.radius * Math.sin(heart.userData.phi) * Math.sin(heart.userData.theta);
+                    heart.position.z = heart.userData.radius * Math.cos(heart.userData.phi);
+                    
+                    // Rotation
+                    heart.rotation.x += heart.userData.rotationSpeed;
+                    heart.rotation.y += heart.userData.rotationSpeed * 0.7;
+                    heart.rotation.z += heart.userData.rotationSpeed * 0.3;
+                    
+                    // Pulsing effect when proposed
+                    if (heart.userData.pulse) {
+                        const elapsed = (Date.now() - heart.userData.pulseStartTime) / 1000;
+                        const scale = 1 + Math.sin(elapsed * 5) * 0.5;
+                        heart.scale.set(scale, scale, scale);
+                        
+                        // Change color over time for happy hearts only
+                        if (heart.material.color.r > 0.5) { // Only for red hearts, not tears or broken hearts
+                            const intensity = (Math.sin(elapsed * 3) + 1) / 2;
+                            heart.material.emissive.setRGB(
+                                0.8 + 0.2 * intensity,
+                                0.2 + 0.3 * intensity,
+                                0.2 + 0.3 * intensity
+                            );
+                        }
+                    }
+                });
+                
+                renderer.render(scene, camera);
+            }
+
+            // Initial resize
+            onWindowResize();
+            animate();
+        }
+
+        // Load Three.js and initialize
+        if (typeof THREE !== 'undefined') {
+            init();
+        } else {
+            // If Three.js is not loaded yet, wait for it
+            window.addEventListener('load', init);
+        }
+    </script>
+</body>
+</html>
