@@ -297,6 +297,13 @@
             pointer-events: none;
             z-index: 15;
         }
+
+        /* Broken heart pieces */
+        .heart-piece {
+            position: absolute;
+            opacity: 0;
+            z-index: 25;
+        }
     </style>
 </head>
 <body>
@@ -406,6 +413,44 @@
             }, 100);
         }
 
+        // Create broken heart pieces
+        function createBrokenHeartPieces() {
+            const container = document.getElementById('effects-container');
+            const heartPieces = ['💔', '❤️', '🖤', '🤍'];
+            
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'heart-piece';
+                piece.innerHTML = heartPieces[Math.floor(Math.random() * heartPieces.length)];
+                piece.style.left = '50%';
+                piece.style.top = '50%';
+                piece.style.fontSize = (20 + Math.random() * 30) + 'px';
+                piece.style.opacity = '0';
+                container.appendChild(piece);
+                
+                // Animate pieces flying out
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 200;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                setTimeout(() => {
+                    piece.style.opacity = '1';
+                    piece.style.transition = 'all 2s ease-out';
+                    piece.style.transform = `translate(${x}px, ${y}px) rotate(${Math.random() * 720}deg)`;
+                    
+                    // Fade out
+                    setTimeout(() => {
+                        piece.style.opacity = '0';
+                        // Remove piece after animation
+                        setTimeout(() => {
+                            piece.remove();
+                        }, 1000);
+                    }, 1500);
+                }, i * 50);
+            }
+        }
+
         // Create confetti effect for celebration
         function createConfetti() {
             const colors = ['#ff6b6b', '#6b6bff', '#6bff6b', '#ffff6b', '#ff6bff'];
@@ -513,6 +558,20 @@
                 heartShape.bezierCurveTo(0.5, 1, 1, 0.5, 0, 0);
                 
                 return heartShape;
+            }
+
+            // Create broken heart shape (two separate pieces)
+            function createBrokenHeart() {
+                const brokenHeartShape = new THREE.Shape();
+                
+                // Left piece of broken heart
+                brokenHeartShape.moveTo(-0.5, 0);
+                brokenHeartShape.bezierCurveTo(-0.5, -0.3, -0.8, -0.6, -0.5, -1);
+                brokenHeartShape.bezierCurveTo(-0.2, -0.6, -0.3, -0.3, -0.3, 0);
+                brokenHeartShape.bezierCurveTo(-0.6, 0.3, -0.5, 0.6, -0.5, 0.8);
+                brokenHeartShape.bezierCurveTo(-0.3, 0.6, -0.2, 0.3, -0.3, 0);
+                
+                return brokenHeartShape;
             }
 
             // Create tear drop shape for emotional effect
@@ -686,24 +745,28 @@
                 });
             });
 
-            // Handle "No" button with completely different emotional effect
+            // Handle "No" button with heartbroken 3D shapes and background animation
             document.getElementById('no-button').addEventListener('click', () => {
                 // Hide buttons
                 document.querySelector('.buttons-container').style.display = 'none';
                 
                 // Change title and subtitle to emotional content
-                document.getElementById('title').textContent = "My World Is Collapsing";
-                document.getElementById('subtitle').textContent = "Darkness Surrounds Me...";
-                document.getElementById('message').textContent = "Your rejection has shattered my soul. The light has gone from my world. I'm drowning in an ocean of despair.";
+                document.getElementById('title').textContent = "My Heart Is Broken";
+                document.getElementById('subtitle').textContent = "Pieces Falling All Around...";
+                document.getElementById('message').textContent = "Your rejection has shattered my heart into a thousand pieces. Each piece carries a memory of our time together, now scattered to the winds.";
                 
-                // Change background to darker colors
-                document.body.style.background = 'linear-gradient(135deg, #000000, #1a1a2e, #16213e)';
+                // Change background to dark gray with crack effect
+                document.body.style.background = 'linear-gradient(135deg, #2c3e50, #34495e, #2c3e50)';
                 document.body.style.animation = 'none';
+                
+                // Add crack effect to background
+                document.body.style.backgroundImage = 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%), repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)';
                 
                 // Create emotional effects
                 createTearDrops();
                 createRain();
                 createLightning();
+                createBrokenHeartPieces();
                 
                 // Clear all existing hearts
                 while(hearts.length > 0) {
@@ -711,7 +774,50 @@
                     scene.remove(heart);
                 }
                 
-                // Create new sad 3D objects (tears, clouds, broken pieces)
+                // Create new heartbroken 3D objects
+                const brokenHeartGeometry = new THREE.ExtrudeGeometry(createBrokenHeart(), {
+                    depth: 0.2,
+                    bevelEnabled: true,
+                    bevelSegments: 2,
+                    steps: 1,
+                    bevelSize: 0.05,
+                    bevelThickness: 0.05
+                });
+                
+                const brokenHeartMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x78909c,
+                    emissive: 0x546e7a,
+                    emissiveIntensity: 0.3,
+                    specular: 0xb0bec5,
+                    shininess: 50,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                
+                // Add broken heart pieces
+                for (let i = 0; i < 25; i++) {
+                    const brokenHeart = new THREE.Mesh(brokenHeartGeometry, brokenHeartMaterial);
+                    brokenHeart.position.set(
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20
+                    );
+                    brokenHeart.scale.set(0.8 + Math.random() * 1.2, 0.8 + Math.random() * 1.2, 0.8 + Math.random() * 1.2);
+                    brokenHeart.userData = {
+                        speed: 0.02 + Math.random() * 0.05,
+                        rotationSpeed: 0.01 + Math.random() * 0.03,
+                        type: 'brokenHeart',
+                        velocity: { 
+                            x: (Math.random() - 0.5) * 0.1, 
+                            y: (Math.random() - 0.5) * 0.1, 
+                            z: (Math.random() - 0.5) * 0.1 
+                        }
+                    };
+                    scene.add(brokenHeart);
+                    hearts.push(brokenHeart); // Add to hearts array for animation
+                }
+                
+                // Create tear drop objects
                 const tearGeometry = new THREE.ExtrudeGeometry(createTearDrop(), {
                     depth: 0.2,
                     bevelEnabled: true,
@@ -749,85 +855,17 @@
                     hearts.push(tear); // Add to hearts array for animation
                 }
                 
-                // Create cloud objects
-                const cloudGeometry = new THREE.ExtrudeGeometry(createCloud(), {
-                    depth: 0.3,
-                    bevelEnabled: true,
-                    bevelSegments: 1,
-                    steps: 1,
-                    bevelSize: 0.1,
-                    bevelThickness: 0.1
-                });
-                
-                const cloudMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x78909c,
-                    emissive: 0x546e7a,
-                    emissiveIntensity: 0.2,
-                    specular: 0xb0bec5,
-                    shininess: 30,
-                    transparent: true,
-                    opacity: 0.7
-                });
-                
-                // Add clouds
-                for (let i = 0; i < 10; i++) {
-                    const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    cloud.position.set(
-                        (Math.random() - 0.5) * 30,
-                        5 + Math.random() * 10,
-                        (Math.random() - 0.5) * 30
-                    );
-                    cloud.scale.set(1 + Math.random() * 2, 1 + Math.random(), 1 + Math.random() * 2);
-                    cloud.userData = {
-                        speed: 0.005 + Math.random() * 0.01,
-                        rotationSpeed: 0.002 + Math.random() * 0.005,
-                        type: 'cloud'
-                    };
-                    scene.add(cloud);
-                    hearts.push(cloud); // Add to hearts array for animation
-                }
-                
-                // Create broken pieces
-                const brokenGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                const brokenMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x455a64,
-                    emissive: 0x37474f,
-                    emissiveIntensity: 0.1,
-                    specular: 0x90a4ae,
-                    shininess: 20,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                
-                // Add broken pieces
-                for (let i = 0; i < 30; i++) {
-                    const piece = new THREE.Mesh(brokenGeometry, brokenMaterial);
-                    piece.position.set(
-                        (Math.random() - 0.5) * 20,
-                        5 + Math.random() * 10,
-                        (Math.random() - 0.5) * 20
-                    );
-                    piece.userData = {
-                        speed: 0.03 + Math.random() * 0.05,
-                        rotationSpeed: 0.02 + Math.random() * 0.03,
-                        type: 'piece',
-                        velocity: { x: (Math.random() - 0.5) * 0.1, y: (Math.random() - 0.5) * 0.1, z: (Math.random() - 0.5) * 0.1 }
-                    };
-                    scene.add(piece);
-                    hearts.push(piece); // Add to hearts array for animation
-                }
-                
                 // Show response with encouragement to choose yes
-                document.getElementById('response').textContent = "Please... Give Us Another Chance";
+                document.getElementById('response').textContent = "Please... Put My Heart Back Together";
                 document.getElementById('response').style.opacity = '1';
                 document.getElementById('response').style.textShadow = '0 0 20px #64b5f6, 0 0 30px #1976d2';
                 document.getElementById('response').style.background = 'linear-gradient(to right, #64b5f6, #1976d2, #64b5f6)';
                 
                 // Show the yes button again but larger
                 const yesButton = document.getElementById('yes-button');
-                yesButton.textContent = "Yes, Forgive Me!";
+                yesButton.textContent = "Yes, I'll Heal Your Heart";
                 yesButton.style.display = 'block';
-                yesButton.style.width = '250px';
+                yesButton.style.width = '300px';
                 yesButton.style.margin = '20px auto';
                 yesButton.style.position = 'relative';
                 yesButton.style.left = '0';
@@ -839,10 +877,10 @@
                 // Add event listener to the new yes button
                 yesButton.onclick = function() {
                     document.querySelector('.buttons-container').style.display = 'none';
-                    document.getElementById('title').textContent = "You've Saved Me!";
-                    document.getElementById('subtitle').textContent = "Light Returns To My World!";
-                    document.getElementById('message').textContent = "Your forgiveness has brought light back to my world. I promise to cherish you forever!";
-                    document.getElementById('response').textContent = "I LOVE YOU WITH ALL MY HEART!";
+                    document.getElementById('title').textContent = "You've Healed My Heart!";
+                    document.getElementById('subtitle').textContent = "Love Conquers All!";
+                    document.getElementById('message').textContent = "Your love has mended every crack and put my heart back together. I promise to cherish you forever!";
+                    document.getElementById('response').textContent = "I LOVE YOU MORE THAN WORDS CAN EXPRESS!";
                     document.getElementById('response').style.opacity = '1';
                     document.getElementById('response').style.textShadow = '0 0 20px #ff6b6b, 0 0 30px #ff2a2a';
                     document.getElementById('response').style.background = 'linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1)';
@@ -850,6 +888,7 @@
                     // Restore background
                     document.body.style.background = 'linear-gradient(135deg, #1a0a2e, #0d0630, #3a1a5c)';
                     document.body.style.animation = 'gradientBG 15s ease infinite';
+                    document.body.style.backgroundImage = 'none';
                     
                     // Create celebration effects
                     createConfetti();
@@ -937,6 +976,33 @@
                                 );
                             }
                         }
+                    } else if (obj.userData.type === 'brokenHeart') {
+                        // Floating broken hearts with random movement
+                        obj.position.x += obj.userData.velocity.x;
+                        obj.position.y += obj.userData.velocity.y;
+                        obj.position.z += obj.userData.velocity.z;
+                        
+                        // Rotation
+                        obj.rotation.x += obj.userData.rotationSpeed;
+                        obj.rotation.y += obj.userData.rotationSpeed * 0.7;
+                        obj.rotation.z += obj.userData.rotationSpeed * 0.3;
+                        
+                        // Apply gravity
+                        obj.userData.velocity.y -= 0.0005;
+                        
+                        // Reset position when out of view
+                        if (obj.position.y < -15 || obj.position.x > 20 || obj.position.x < -20 || obj.position.z > 20 || obj.position.z < -20) {
+                            obj.position.set(
+                                (Math.random() - 0.5) * 20,
+                                (Math.random() - 0.5) * 20,
+                                (Math.random() - 0.5) * 20
+                            );
+                            obj.userData.velocity = { 
+                                x: (Math.random() - 0.5) * 0.1, 
+                                y: (Math.random() - 0.5) * 0.1, 
+                                z: (Math.random() - 0.5) * 0.1 
+                            };
+                        }
                     } else if (obj.userData.type === 'tear') {
                         // Falling tears
                         obj.position.y -= obj.userData.speed;
@@ -950,42 +1016,6 @@
                             obj.position.y = 10 + Math.random() * 5;
                             obj.position.x = (Math.random() - 0.5) * 20;
                             obj.position.z = (Math.random() - 0.5) * 20;
-                        }
-                    } else if (obj.userData.type === 'cloud') {
-                        // Slow floating clouds
-                        obj.position.x += obj.userData.speed;
-                        obj.rotation.y += obj.userData.rotationSpeed;
-                        
-                        // Reset position when out of view
-                        if (obj.position.x > 15) {
-                            obj.position.x = -15;
-                            obj.position.y = 5 + Math.random() * 10;
-                            obj.position.z = (Math.random() - 0.5) * 30;
-                        }
-                    } else if (obj.userData.type === 'piece') {
-                        // Floating broken pieces with gravity
-                        obj.position.x += obj.userData.velocity.x;
-                        obj.position.y += obj.userData.velocity.y;
-                        obj.position.z += obj.userData.velocity.z;
-                        
-                        // Apply gravity
-                        obj.userData.velocity.y -= 0.001;
-                        
-                        // Rotation
-                        obj.rotation.x += obj.userData.rotationSpeed;
-                        obj.rotation.y += obj.userData.rotationSpeed * 0.7;
-                        obj.rotation.z += obj.userData.rotationSpeed * 0.3;
-                        
-                        // Reset position when out of view
-                        if (obj.position.y < -10 || obj.position.x > 15 || obj.position.x < -15) {
-                            obj.position.y = 5 + Math.random() * 10;
-                            obj.position.x = (Math.random() - 0.5) * 20;
-                            obj.position.z = (Math.random() - 0.5) * 20;
-                            obj.userData.velocity = { 
-                                x: (Math.random() - 0.5) * 0.1, 
-                                y: (Math.random() - 0.5) * 0.1, 
-                                z: (Math.random() - 0.5) * 0.1 
-                            };
                         }
                     }
                 });
